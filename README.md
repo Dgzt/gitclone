@@ -7,7 +7,7 @@ Install:
 
 Use (example):
 ---------------
- - gitclone https://github.com/Dgzt/gitclone
+ - gitclone git@github.com:Dgzt/gitclone.git
 
  Enjoy!
  
