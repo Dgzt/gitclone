@@ -5,11 +5,11 @@ Install:
 
 2) Copy the '.gitclonerc' to the home directory ( /home/$USERNAME/ )
 
-3) Edig the '.gitclonerc' 
+3) Edit the '.gitclonerc' 
 
 Use (example):
 ---------------
  - gitclone git@github.com:Dgzt/gitclone.git
 
- Enjoy!
- 
+Enjoy!
+------ 
