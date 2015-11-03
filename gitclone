@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# Config
+configpath=~/.gitclonerc
+commentprefix=#
+separator=\"
+#
+
+# Check parameter
+if [ $# -ne 1 ] ; then
+	echo "ERROR! Wrong parameter(s)!"
+	exit 1
+fi
+
+# Clone the repository
+git clone $1
+
+# Set the server name and directory name
+indexAt=$(expr index "$1" "@")
+indexDoubleDot=$(expr index "$1" ":")
+indexSlash=$(expr index "$1" "/")
+lastIndexDot=$(expr $indexSlash + $(expr index "${1:indexSlash}" ".") )
+
+gitServerName=${1:$indexAt:$indexDoubleDot-$indexAt-1}
+gitDirectoryName=${1:$indexSlash:$lastIndexDot-$indexSlash-1}
+
+# Read the config file and set the username and email address
+while read -r line ; do
+	# If this line is comment then skip
+	if [ "${#line}" -ge "${#commentprefix}" ] && [ ${line:0:${#commentprefix}} != $commentprefix ] ; then
+		
+		# Git server
+		index1=$(expr index "$line" $separator)
+		index2=$(expr index "${line:$index1}" $separator)
+		gitserver=${line:$index1:$index2-1}
+		
+		if [ "$index1" == "0" ] || [ "$index2" == "0" ] ; then
+			continue
+		fi
+		
+		line=${line:$index1+$index2}
+		
+		# Name
+		index3=$(expr index "$line" $separator)
+		index4=$(expr index "${line:$index3}" $separator)
+		name=${line:$index3:$index4-1}
+		
+		if [ "$index3" == "0" ] || [ "$index4" == "0" ] ; then
+			continue
+		fi
+		
+		line=${line:$index3+$index4}
+		
+		#E-mail
+		index5=$(expr index "$line" $separator)
+		index6=$(expr index "${line:$index5}" $separator)
+		address=${line:$index5:$index6-1}
+		
+		if [ "$index5" == "0" ] || [ "$index6" == "0" ] ; then
+			continue
+		fi
+		
+		if [ $gitserver == $gitServerName ] ; then
+			cd $gitDirectoryName
+			git config user.name "$name"
+			git config user.email $address
+		fi
+	fi
+done < "$configpath"
