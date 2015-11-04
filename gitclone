@@ -16,13 +16,31 @@ fi
 git clone $1
 
 # Set the server name and directory name
-indexAt=$(expr index "$1" "@")
-indexDoubleDot=$(expr index "$1" ":")
-indexSlash=$(expr index "$1" "/")
-lastIndexDot=$(expr $indexSlash + $(expr index "${1:indexSlash}" ".") )
+if [ "${1:0:4}" == "http" ] ; then 
+	# http or Subversion
+	indexDoubleSlash=$(expr index "$1" "//")
+	indexFirstSlash=$(expr $indexDoubleSlash + $(expr index "${1:$indexDoubleSlash+1}" "/") )
+	indexSecondSlash=$(expr $indexFirstSlash + $(expr index "${1:$indexFirstSlash+1}" "/") )
+	lastIndexDot=$(expr index "${1:$indexSecondSlash+1}" ".")
+	
+	gitServerName=${1:$indexDoubleSlash+1:$indexFirstSlash-$indexDoubleSlash-1}
+	if [ "$lastIndexDot" -gt "0" ] ; then
+		# http
+		gitDirectoryName=${1:$indexSecondSlash+1:$lastIndexDot-1}
+	else
+		# Subversion
+		gitDirectoryName=${1:$indexSecondSlash+1}
+	fi
+else 
+	# ssh
+	indexAt=$(expr index "$1" "@")
+	indexDoubleDot=$(expr index "$1" ":")
+	indexSlash=$(expr index "$1" "/")
+	lastIndexDot=$(expr $indexSlash + $(expr index "${1:indexSlash}" ".") )
 
-gitServerName=${1:$indexAt:$indexDoubleDot-$indexAt-1}
-gitDirectoryName=${1:$indexSlash:$lastIndexDot-$indexSlash-1}
+	gitServerName=${1:$indexAt:$indexDoubleDot-$indexAt-1}
+	gitDirectoryName=${1:$indexSlash:$lastIndexDot-$indexSlash-1}
+fi
 
 # Read the config file and set the username and email address
 while read -r line ; do
